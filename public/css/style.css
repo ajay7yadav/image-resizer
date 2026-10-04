@@ -1,0 +1,116 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+}
+
+.container {
+    width: 500px;
+    max-width: 90%;
+    margin: 50px auto;
+    padding: 30px;
+    background: white;
+    border-radius: 10px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+input[type="file"],
+input[type="number"] {
+    width: 100%;
+    padding: 10px;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    background: #222;
+    color: white;
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.preview {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.preview img {
+    max-width: 100%;
+    max-height: 400px;
+}
+
+#message {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.image-info {
+    text-align: center;
+    margin: 10px 0 20px;
+    font-size: 14px;
+    color: #555;
+}
+
+.image-info p {
+    margin: 5px 0;
+}
+
+input[type="range"] {
+    width: 100%;
+    cursor: pointer;
+}
+
+#qualityValue {
+    font-weight: normal;
+}
+
+.drop-zone {
+    border: 2px dashed #aaa;
+    border-radius: 10px;
+    padding: 30px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.drop-zone p {
+    margin: 8px 0;
+}
+
+.drop-zone-info {
+    font-size: 13px;
+    color: #777;
+}
+
+.drop-zone button {
+    width: auto;
+    padding: 10px 20px;
+}
+
+.drop-zone.drag-over {
+    border-style: solid;
+    transform: scale(1.01);
+}

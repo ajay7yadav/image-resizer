@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Image Resizer</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>Image Resizer</h1>
+
+        <form id="resizeForm">
+
+            <!-- Image -->
+            <div class="form-group">
+
+                <label>
+                    Select Image
+                </label>
+
+                <div id="dropZone" class="drop-zone">
+
+                    <p>
+                        Drag & Drop your image here
+                    </p>
+
+                    <p>
+                        or
+                    </p>
+
+                    <button
+                        type="button"
+                        id="chooseImageButton"
+                    >
+                        Choose Image
+                    </button>
+
+                    <p class="drop-zone-info">
+                        JPG, PNG or WebP • Maximum 10 MB
+                    </p>
+
+                    <input
+                        type="file"
+                        id="image"
+                        name="image"
+                        accept="image/jpeg,image/png,image/webp"
+                        hidden
+                    >
+                </div>
+
+            </div>
+
+            <!-- Original Image Preview -->
+            <div id="originalPreview" class="preview"></div>
+
+            <div id="originalInfo" class="image-info"></div>
+
+            <!-- Width -->
+            <div class="form-group">
+                <label for="width">
+                    Width
+                </label>
+
+                <input
+                    type="number"
+                    id="width"
+                    name="width"
+                    placeholder="Enter width"
+                    min="1"
+                    max="5000"
+                    required
+                >
+            </div>
+
+            <!-- Height -->
+            <div class="form-group">
+                <label for="height">
+                    Height
+                </label>
+
+                <input
+                    type="number"
+                    id="height"
+                    name="height"
+                    placeholder="Enter height"
+                    min="1"
+                    max="5000"
+                    required
+                >
+            </div>
+
+            <!-- Quality slider -->
+            <div class="form-group">
+
+                <label for="quality">
+                    Quality:
+                    <span id="qualityValue">80%</span>
+                </label>
+
+                <input
+                    type="range"
+                    id="quality"
+                    name="quality"
+                    min="10"
+                    max="100"
+                    value="80"
+                >
+
+            </div>
+
+            <!-- Maintain Aspect Ratio -->
+            <div class="form-group">
+
+                <label>
+                    <input
+                        type="checkbox"
+                        id="aspectRatio"
+                        checked
+                    >
+
+                    Maintain aspect ratio
+                </label>
+
+            </div>
+
+            <!-- Resize Button -->
+            <button
+                type="submit"
+                id="resizeButton"
+            >
+                Resize Image
+            </button>
+
+        </form>
+
+        <!-- Message -->
+        <div id="message"></div>
+
+        <!-- Resized Image -->
+        <div id="result" class="preview"></div>
+
+        <div id="resultInfo" class="image-info"></div>
+
+    </div>
+
+    <script
+        type="module"
+        src="/js/app.js"
+    ></script>
+
+</body>
+
+</html>
