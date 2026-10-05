@@ -22,6 +22,12 @@ const resizeButton = document.getElementById("resizeButton");
 const dropZone = document.getElementById("dropZone");
 const chooseImageButton = document.getElementById("chooseImageButton");
 
+const formatInput = document.getElementById("format");
+
+const resizeModeInput = document.getElementById("resizeMode");
+const percentageInput = document.getElementById("percentage");
+const percentageGroup = document.getElementById("percentageGroup");
+
 let selectedImage = null;
 
 let originalWidth = 0;
@@ -30,6 +36,10 @@ let originalHeight = 0;
 let aspectRatio = 0;
 
 const MAX_DIMENSION = 5000;
+
+// -----------------------------------
+// File Size Formatter
+// -----------------------------------
 
 const formatFileSize = (bytes) => {
 
@@ -42,11 +52,11 @@ const formatFileSize = (bytes) => {
     }
 
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+
 };
 
-
 // -----------------------------------
-// Image Selection code
+// Image Selection
 // -----------------------------------
 
 const handleImageSelection = (file) => {
@@ -85,14 +95,15 @@ const handleImageSelection = (file) => {
         URL.createObjectURL(file);
 
     originalPreview.innerHTML = `
-        <h3>Original Image</h3>
+    <h3>Original Image</h3>
 
-        <img
-            src="${imageUrl}"
-            alt="Original image"
-        >
-    `;
+    <img
+        src="${imageUrl}"
+        alt="Original image"
+    >
+`;
 
+// Input Image information show in frontend
     const image = new Image();
 
     image.onload = () => {
@@ -110,16 +121,26 @@ const handleImageSelection = (file) => {
             originalHeight;
 
         originalInfo.innerHTML = `
-            <p>
-                <strong>Dimensions:</strong>
-                ${originalWidth} × ${originalHeight}px
-            </p>
+        <p>
+            <strong>Dimensions:</strong>
+            ${originalWidth} × ${originalHeight}px
+        </p>
 
-            <p>
-                <strong>File size:</strong>
-                ${formatFileSize(file.size)}
-            </p>
-        `;
+        <p>
+            <strong>File size:</strong>
+            ${formatFileSize(file.size)}
+        </p>
+        
+        <p>
+            <strong>Format:</strong>
+            ${file.type.split("/")[1].toUpperCase()}
+        </p>
+
+        <p>
+            <strong>Aspect Ratio:</strong>
+            ${aspectRatio.toFixed(2)}
+        </p>
+    `;
 
         URL.revokeObjectURL(imageUrl);
     };
@@ -129,7 +150,12 @@ const handleImageSelection = (file) => {
     result.innerHTML = "";
     resultInfo.innerHTML = "";
     message.textContent = "";
+
 };
+
+// -----------------------------------
+// Image Input
+// -----------------------------------
 
 imageInput.addEventListener(
     "change",
@@ -140,7 +166,12 @@ imageInput.addEventListener(
 
         handleImageSelection(file);
     }
+
 );
+
+// -----------------------------------
+// Choose Image Button
+// -----------------------------------
 
 chooseImageButton.addEventListener(
     "click",
@@ -148,7 +179,12 @@ chooseImageButton.addEventListener(
 
         imageInput.click();
     }
+
 );
+
+// -----------------------------------
+// Drag Over
+// -----------------------------------
 
 dropZone.addEventListener(
     "dragover",
@@ -160,7 +196,12 @@ dropZone.addEventListener(
             "drag-over"
         );
     }
+
 );
+
+// -----------------------------------
+// Drag Leave
+// -----------------------------------
 
 dropZone.addEventListener(
     "dragleave",
@@ -170,7 +211,12 @@ dropZone.addEventListener(
             "drag-over"
         );
     }
+
 );
+
+// -----------------------------------
+// Drop Image
+// -----------------------------------
 
 dropZone.addEventListener(
     "drop",
@@ -187,8 +233,122 @@ dropZone.addEventListener(
 
         handleImageSelection(file);
     }
+
 );
 
+// -----------------------------------
+// Resize Mode
+// -----------------------------------
+
+resizeModeInput.addEventListener("change", () => {
+
+    const mode = resizeModeInput.value;
+
+    // Hide percentage by default
+    percentageGroup.style.display = "none";
+
+
+    // Percentage mode
+    if (mode === "percentage") {
+
+        percentageGroup.style.display = "block";
+
+        widthInput.disabled = true;
+        heightInput.disabled = true;
+
+        return;
+    }
+
+
+    // Width only
+    if (mode === "width") {
+
+        widthInput.disabled = false;
+        heightInput.disabled = true;
+
+        aspectRatioCheckbox.checked = true;
+
+        return;
+    }
+
+
+    // Height only
+    if (mode === "height") {
+
+        widthInput.disabled = true;
+        heightInput.disabled = false;
+
+        aspectRatioCheckbox.checked = true;
+
+        return;
+    }
+
+
+    // Custom mode
+    widthInput.disabled = false;
+    heightInput.disabled = false;
+});
+
+// -----------------------------------
+// Parcentage Calculation
+// -----------------------------------
+percentageInput.addEventListener("input", () => {
+
+    if (resizeModeInput.value !== "percentage") {
+        return;
+    }
+
+    const percentage =
+        Number(percentageInput.value);
+
+    if (
+        !Number.isFinite(percentage) ||
+        percentage <= 0
+    ) {
+        return;
+    }
+
+    let width =
+        Math.round(
+            originalWidth * percentage / 100
+        );
+
+    let height =
+        Math.round(
+            originalHeight * percentage / 100
+        );
+
+
+    // Maximum dimension
+    if (
+        width > MAX_DIMENSION ||
+        height > MAX_DIMENSION
+    ) {
+
+        const scale =
+            Math.min(
+                MAX_DIMENSION / originalWidth,
+                MAX_DIMENSION / originalHeight
+            );
+
+        width =
+            Math.round(
+                originalWidth * scale
+            );
+
+        height =
+            Math.round(
+                originalHeight * scale
+            );
+    }
+
+
+    widthInput.value =
+        width;
+
+    heightInput.value =
+        height;
+});
 
 // -----------------------------------
 // Width Change
@@ -200,7 +360,8 @@ widthInput.addEventListener("input", () => {
         return;
     }
 
-    let width = Number(widthInput.value);
+    let width =
+        Number(widthInput.value);
 
     if (!width || !aspectRatio) {
         return;
@@ -208,29 +369,36 @@ widthInput.addEventListener("input", () => {
 
     // Maximum width
     if (width > MAX_DIMENSION) {
+
         width = MAX_DIMENSION;
-        widthInput.value = width;
+
+        widthInput.value =
+            width;
     }
 
-    let height = Math.round(
-        width / aspectRatio
-    );
+    let height =
+        Math.round(
+            width / aspectRatio
+        );
 
     // If calculated height exceeds maximum
     if (height > MAX_DIMENSION) {
 
         height = MAX_DIMENSION;
 
-        width = Math.round(
-            height * aspectRatio
-        );
+        width =
+            Math.round(
+                height * aspectRatio
+            );
 
-        widthInput.value = width;
+        widthInput.value =
+            width;
     }
 
-    heightInput.value = height;
-});
+    heightInput.value =
+        height;
 
+});
 
 // -----------------------------------
 // Height Change
@@ -242,7 +410,8 @@ heightInput.addEventListener("input", () => {
         return;
     }
 
-    let height = Number(heightInput.value);
+    let height =
+        Number(heightInput.value);
 
     if (!height || !aspectRatio) {
         return;
@@ -250,137 +419,325 @@ heightInput.addEventListener("input", () => {
 
     // Maximum height
     if (height > MAX_DIMENSION) {
+
         height = MAX_DIMENSION;
-        heightInput.value = height;
+
+        heightInput.value =
+            height;
     }
 
-    let width = Math.round(
-        height * aspectRatio
-    );
+    let width =
+        Math.round(
+            height * aspectRatio
+        );
 
     // If calculated width exceeds maximum
     if (width > MAX_DIMENSION) {
 
         width = MAX_DIMENSION;
 
-        height = Math.round(
-            width / aspectRatio
-        );
+        height =
+            Math.round(
+                width / aspectRatio
+            );
 
-        heightInput.value = height;
+        heightInput.value =
+            height;
     }
 
-    widthInput.value = width;
+    widthInput.value =
+        width;
+
 });
 
+// -----------------------------------
+// Quality Slider
+// -----------------------------------
+
+qualityInput.addEventListener("input", () => {
+
+    qualityValue.textContent =
+        `${qualityInput.value}%`;
+
+});
 
 // -----------------------------------
 // Resize Form Submit
 // -----------------------------------
 
-resizeForm.addEventListener("submit", async (event) => {
+resizeForm.addEventListener(
+    "submit",
+    async (event) => {
 
-    event.preventDefault();
+        event.preventDefault();
 
-    if (!selectedImage) {
-
-        message.textContent =
-            "Please select an image";
-
-        return;
-    }
-
-    const width = Number(widthInput.value);
-    const height = Number(heightInput.value);
-
-
-    // Frontend validation
-    if (!Number.isInteger(width) || width <= 0) {
-
-        message.textContent =
-            "Please enter a valid width";
-
-        return;
-    }
-
-
-    if (!Number.isInteger(height) || height <= 0) {
-
-        message.textContent =
-            "Please enter a valid height";
-
-        return;
-    }
-
-
-    if (
-        width > MAX_DIMENSION ||
-        height > MAX_DIMENSION
-    ) {
-
-        message.textContent =
-            `Width and height cannot be greater than ${MAX_DIMENSION}px`;
-
-        return;
-    }
-
-
-    const formData = new FormData();
-
-    formData.append(
-        "image",
-        selectedImage
-    );
-
-    formData.append(
-        "width",
-        width
-    );
-
-    formData.append(
-        "height",
-        height
-    );
-
-    const quality = Number(qualityInput.value);
-    formData.append("quality", quality);
-
-    try {
-
-        resizeButton.disabled = true;
-
-        resizeButton.textContent =
-            "Resizing...";
-
-        message.textContent = "";
-
-        result.innerHTML = "";
-
-
-        const response = await fetch(
-            "/api/resize",
-            {
-                method: "POST",
-                body: formData
-            }
-        );
-
-
-        const data = await response.json();
-
-
-        if (!response.ok) {
+        if (!selectedImage) {
 
             message.textContent =
-                data.message ||
-                "Something went wrong";
+                "Please select an image";
 
             return;
         }
 
-        message.textContent = data.message;
+        const resizeMode = resizeModeInput.value;
+        const percentage = Number(percentageInput.value);
 
-        result.innerHTML = `
+        let width =
+            Number(widthInput.value);
+
+        let height =
+            Number(heightInput.value);
+
+        const quality =
+            Number(qualityInput.value);
+
+        const maintainAspectRatio =
+            aspectRatioCheckbox.checked;
+
+        const format = formatInput.value;
+
+        // -----------------------------------
+        // Calculate Dimensions
+        // -----------------------------------
+
+        if (resizeMode === "percentage") {
+
+            if (
+                !Number.isFinite(percentage) ||
+                percentage <= 0 ||
+                percentage > 500
+            ) {
+
+                message.textContent =
+                    "Percentage must be between 1 and 500";
+
+                return;
+            }
+
+            width =
+                Math.round(
+                    originalWidth * percentage / 100
+                );
+
+            height =
+                Math.round(
+                    originalHeight * percentage / 100
+                );
+        }
+
+
+        // -----------------------------------
+        // Width Only
+        // -----------------------------------
+
+        if (resizeMode === "width") {
+
+            width =
+                Number(widthInput.value);
+
+            if (
+                !Number.isInteger(width) ||
+                width <= 0
+            ) {
+
+                message.textContent =
+                    "Please enter a valid width";
+
+                return;
+            }
+
+            height =
+                Math.round(
+                    width / aspectRatio
+                );
+        }
+
+
+        // -----------------------------------
+        // Height Only
+        // -----------------------------------
+
+        if (resizeMode === "height") {
+
+            height =
+                Number(heightInput.value);
+
+            if (
+                !Number.isInteger(height) ||
+                height <= 0
+            ) {
+
+                message.textContent =
+                    "Please enter a valid height";
+
+                return;
+            }
+
+            width =
+                Math.round(
+                    height * aspectRatio
+                );
+        }
+
+
+        // -----------------------------------
+        // Width Validation
+        // -----------------------------------
+
+        if (
+            !Number.isInteger(width) ||
+            width <= 0
+        ) {
+
+            message.textContent =
+                "Please enter a valid width";
+
+            return;
+        }
+
+
+        // -----------------------------------
+        // Height Validation
+        // -----------------------------------
+
+        if (
+            !Number.isInteger(height) ||
+            height <= 0
+        ) {
+
+            message.textContent =
+                "Please enter a valid height";
+
+            return;
+        }
+
+
+        // -----------------------------------
+        // Maximum Dimension Validation
+        // -----------------------------------
+
+        if (
+            width > MAX_DIMENSION ||
+            height > MAX_DIMENSION
+        ) {
+
+            message.textContent =
+                `Width and height cannot be greater than ${MAX_DIMENSION}px`;
+
+            return;
+        }
+
+
+        // -----------------------------------
+        // Quality Validation
+        // -----------------------------------
+
+        if (
+            !Number.isInteger(quality) ||
+            quality < 1 ||
+            quality > 100
+        ) {
+
+            message.textContent =
+                "Quality must be between 1 and 100";
+
+            return;
+        }
+
+
+        // -----------------------------------
+        // Form Data
+        // -----------------------------------
+
+        const formData =
+            new FormData();
+
+        formData.append(
+            "image",
+            selectedImage
+        );
+
+        formData.append(
+            "width",
+            width
+        );
+
+        formData.append(
+            "height",
+            height
+        );
+
+        formData.append(
+            "maintainAspectRatio",
+            maintainAspectRatio
+        );
+
+        formData.append(
+            "quality",
+            quality
+        );
+
+        formData.append(
+            "format",
+            format
+        );
+
+
+        // -----------------------------------
+        // API Request
+        // -----------------------------------
+
+        try {
+
+            resizeButton.disabled = true;
+
+            resizeButton.textContent =
+                "Resizing...";
+
+            message.textContent = "";
+
+            result.innerHTML = "";
+
+            resultInfo.innerHTML = "";
+
+
+            const response =
+                await fetch(
+                    "/api/resize",
+                    {
+                        method: "POST",
+                        body: formData
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            // -----------------------------------
+            // API Error
+            // -----------------------------------
+
+            if (!response.ok) {
+
+                message.textContent =
+                    data.message ||
+                    "Something went wrong";
+
+                return;
+            }
+
+
+            // -----------------------------------
+            // Success
+            // -----------------------------------
+
+            message.textContent =
+                data.message;
+
+
+            result.innerHTML = `
             <h3>Resized Image</h3>
 
             <img
@@ -398,7 +755,8 @@ resizeForm.addEventListener("submit", async (event) => {
             </a>
         `;
 
-        resultInfo.innerHTML = `
+
+            resultInfo.innerHTML = `
             <p>
                 <strong>Dimensions:</strong>
                 ${data.width} × ${data.height}px
@@ -406,36 +764,44 @@ resizeForm.addEventListener("submit", async (event) => {
 
             <p>
                 <strong>Quality:</strong>
-                ${quality}%
+                ${data.quality}%
             </p>
 
             <p>
-                <strong>File size:</strong>
-                ${formatFileSize(data.fileSize)}
+                <strong>Format:</strong>
+                ${data.format.toUpperCase()}
             </p>
+
+            <p>
+                <strong>Aspect Ratio:</strong>
+                ${(data.width / data.height).toFixed(2)}
+            </p>
+
+            ${data.fileSize
+                    ? `
+                        <p>
+                            <strong>File size:</strong>
+                            ${formatFileSize(data.fileSize)}
+                        </p>
+                    `
+                    : ""
+                }
         `;
 
-    } catch (error) {
+        } catch (error) {
 
-        console.error(error);
+            console.error(error);
 
-        message.textContent =
-            "Something went wrong. Please try again.";
+            message.textContent =
+                "Something went wrong. Please try again.";
 
-    } finally {
+        } finally {
 
-        resizeButton.disabled = false;
+            resizeButton.disabled = false;
 
-        resizeButton.textContent =
-            "Resize Image";
+            resizeButton.textContent =
+                "Resize Image";
+        }
     }
-});
 
-// -----------------------------------
-// Quality Slider Submit
-// -----------------------------------
-qualityInput.addEventListener("input", () => {
-
-    qualityValue.textContent =
-        `${qualityInput.value}%`;
-});
+);

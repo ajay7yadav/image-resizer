@@ -1,11 +1,14 @@
 import sharp from "sharp";
-// import path from "path";
+import path from "path";
 
 /*
 inputPath  → original image location
 outputPath → where resized image should be saved
 width      → new width
 height     → new height
+quality     → quality %
+maintainAspectRatio     → checked or unchecked
+format = png, jpg, web
 */
 
 const resizeImage = async (
@@ -13,20 +16,15 @@ const resizeImage = async (
     outputPath,
     width,
     height,
-    quality,
-    maintainAspectRatio = true
+    quality = 80,
+    maintainAspectRatio = true,
+    format = null
 ) => {
-
-    const image = sharp(inputPath);
-
-    const metadata = await image.metadata();
-
-    const format = metadata.format;
 
     const resizeOptions = {
         width
     };
-
+    
     if (maintainAspectRatio) {
         resizeOptions.fit = "inside";
         resizeOptions.withoutEnlargement = false;
@@ -35,38 +33,30 @@ const resizeImage = async (
         resizeOptions.fit = "fill";
     }
 
-    let processedImage = image.resize(resizeOptions);
+    const image = sharp(inputPath);
 
-    // Apply quality based on image format
-    if (format === "jpeg") {
+    
+    // Resize image
+    image.resize(resizeOptions);
 
-        processedImage = processedImage.jpeg({
-            quality
-        });
+    // Output format
+    if (format === "jpg" || format === "jpeg") { 
+        image.jpeg({ quality }); 
 
-    } else if (format === "png") {
+    } else if (format === "png") { 
+        image.png({ compressionLevel: 9 }); 
 
-        processedImage = processedImage.png({
-            quality
-        });
-
-    } else if (format === "webp") {
-
-        processedImage = processedImage.webp({
-            quality
-        });
-
-    } else {
-
-        throw new Error(
-            "Unsupported image format"
-        );
+    } else if (format === "webp") { 
+        image.webp({ quality }); 
+    
+    } else { 
+        // Keep original format 
+        image.toFormat("jpeg", { quality }); 
     }
 
-    const result = await processedImage.toFile(
-        outputPath
-    );
-
+    // Save Image
+    const result = await image.toFile(outputPath);
+    
     return {
         width: result.width,
         height: result.height,
